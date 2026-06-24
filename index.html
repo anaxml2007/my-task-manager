@@ -1,37 +1,358 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Task Manager</title>
+    <title>To-Do List</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
-        input { padding: 10px; width: 200px; }
-        button { padding: 10px; cursor: pointer; }
-        ul { list-style-type: none; padding: 0; }
-        li { background: #eee; margin: 5px auto; padding: 10px; width: 250px;
-             display: flex; justify-content: space-between; border-radius: 5px; cursor: pointer; }
-        .done { text-decoration: line-through; color: gray; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0c0c1d 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0, 255, 136, 0.1) 0%, transparent 50%);
+            animation: backgroundPulse 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes backgroundPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        h1 { 
+            font-size: 3em;
+            margin-bottom: 30px;
+            color: #00ffff;
+            text-shadow: 
+                0 0 10px #00ffff,
+                0 0 20px #00ffff,
+                0 0 30px #00ffff,
+                0 0 40px #0080ff;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+            letter-spacing: 3px;
+        }
+        
+        @keyframes titleGlow {
+            from {
+                text-shadow: 
+                    0 0 10px #00ffff,
+                    0 0 20px #00ffff,
+                    0 0 30px #00ffff,
+                    0 0 40px #0080ff;
+            }
+            to {
+                text-shadow: 
+                    0 0 20px #00ffff,
+                    0 0 30px #00ffff,
+                    0 0 40px #00ffff,
+                    0 0 50px #0080ff,
+                    0 0 60px #0080ff;
+            }
+        }
+        
+        .input-container {
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+        
+        input { 
+            padding: 15px 20px; 
+            width: 300px;
+            font-size: 16px;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #00ffff;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        
+        input:focus {
+            border-color: #ff00ff;
+            box-shadow: 
+                0 0 15px rgba(0, 255, 255, 0.5),
+                0 0 25px rgba(255, 0, 255, 0.3);
+        }
+        
+        input::placeholder {
+            color: rgba(0, 255, 255, 0.5);
+        }
+        
+        button { 
+            padding: 15px 25px; 
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            color: #000;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 255, 0.5),
+                0 0 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.8),
+                0 0 30px rgba(0, 255, 255, 0.5),
+                0 0 40px rgba(0, 255, 255, 0.3);
+        }
+        
+        ul { 
+            list-style-type: none; 
+            padding: 0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        li { 
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            margin: 15px auto; 
+            padding: 15px 20px; 
+            width: 100%;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 
+                0 0 10px rgba(0, 255, 255, 0.2),
+                inset 0 0 10px rgba(0, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        li:hover {
+            border-color: rgba(0, 255, 255, 0.6);
+            box-shadow: 
+                0 0 15px rgba(0, 255, 255, 0.4),
+                inset 0 0 15px rgba(0, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .done { 
+            text-decoration: line-through; 
+            color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 0, 255, 0.1);
+            border-color: rgba(255, 0, 255, 0.3);
+            box-shadow: 
+                0 0 10px rgba(255, 0, 255, 0.2),
+                inset 0 0 10px rgba(255, 0, 255, 0.05);
+        }
+        
+        .task-text { 
+            flex-grow: 1; 
+            text-align: left; 
+            cursor: pointer;
+            font-size: 18px;
+            color: #00ffff;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .done .task-text {
+            color: rgba(255, 0, 255, 0.5);
+            text-shadow: 0 0 5px rgba(255, 0, 255, 0.3);
+        }
+        
+        .btn-done { 
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .btn-done:hover { 
+            box-shadow: 
+                0 0 15px rgba(0, 255, 136, 0.8),
+                0 0 25px rgba(0, 255, 136, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .btn-delete { 
+            background: linear-gradient(135deg, #ff0066, #ff0033);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255, 0, 102, 0.5);
+        }
+        
+        .btn-delete:hover { 
+            box-shadow: 
+                0 0 15px rgba(255, 0, 102, 0.8),
+                0 0 25px rgba(255, 0, 102, 0.5);
+            transform: scale(1.05);
+        }
+        
+        /* Floating particles animation */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 10s infinite;
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>To-Do List</h1>
-    <input type="text" id="taskInput" placeholder="Enter a task...">
-    <button onclick="addTask()">Add Task</button>
+    <h1>✨To-Do List✨</h1>
+    
+    <div class="input-container">
+        <input type="text" id="taskInput" placeholder="Enter a task...">
+        <button class="btn-add" onclick="addTask()">Add Task</button>
+    </div>
+    
     <ul id="taskList"></ul>
 
     <script>
+        // Create floating particles
+        function createParticles() {
+            for (let i = 0; i < 20; i++) {
+                let particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                
+                // Random colors for particles
+                const colors = ['#00ffff', '#ff00ff', '#00ff88', '#ff0066'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.boxShadow = `0 0 10px ${particle.style.background}`;
+                
+                document.body.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+        
         function addTask() {
             let input = document.getElementById("taskInput");
             let list = document.getElementById("taskList");
-            if (input.value !== "") {
+            
+            if (input.value.trim() !== "") {
                 let li = document.createElement("li");
-                li.innerHTML = `
-                    <span onclick="this.parentElement.classList.toggle('done')">${input.value}</span>
-                    <button onclick="this.parentElement.remove()">Remove</button>
-                `;
+                
+                // Task text span
+                let taskSpan = document.createElement("span");
+                taskSpan.className = "task-text";
+                taskSpan.textContent = input.value;
+                taskSpan.onclick = function() {
+                    this.parentElement.classList.toggle('done');
+                };
+                
+                // Done button
+                let doneBtn = document.createElement("button");
+                doneBtn.className = "btn-done";
+                doneBtn.textContent = "✓ Done";
+                doneBtn.onclick = function() {
+                    this.parentElement.classList.toggle('done');
+                };
+                
+                // Delete button
+                let deleteBtn = document.createElement("button");
+                deleteBtn.className = "btn-delete";
+                deleteBtn.textContent = "✕ Delete";
+                deleteBtn.onclick = function() {
+                    this.parentElement.style.animation = 'slideOut 0.4s ease-in';
+                    setTimeout(() => {
+                        this.parentElement.remove();
+                    }, 400);
+                };
+                
+                li.appendChild(taskSpan);
+                li.appendChild(doneBtn);
+                li.appendChild(deleteBtn);
                 list.appendChild(li);
+                
                 input.value = "";
+                input.focus();
             }
         }
+        
+        // Allow adding task with Enter key
+        document.getElementById("taskInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                addTask();
+            }
+        });
+        
+        // Add slideOut animation dynamically
+        let style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOut {
+                from {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateX(50px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
