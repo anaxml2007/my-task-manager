@@ -7,12 +7,14 @@
         input { padding: 10px; width: 200px; }
         button { padding: 10px; cursor: pointer; }
         ul { list-style-type: none; padding: 0; }
-        li { background: #eee; margin: 5px auto; padding: 10px; width: 250px; border-radius: 5px; }
+        li { background: #eee; margin: 5px auto; padding: 10px; width: 250px; 
+             display: flex; justify-content: space-between; border-radius: 5px; }
+        .done { text-decoration: line-through; color: gray; }
     </style>
 </head>
 <body>
     <h1>To-Do List</h1>
-    <input type="text" id="taskInput" placeholder="Enter a new task...">
+    <input type="text" id="taskInput" placeholder="Enter a task...">
     <button onclick="addTask()">Add Task</button>
     <ul id="taskList"></ul>
 
@@ -22,7 +24,10 @@
             let list = document.getElementById("taskList");
             if (input.value !== "") {
                 let li = document.createElement("li");
-                li.innerText = input.value;
+                li.innerHTML = `
+                    <span onclick="this.classList.toggle('done')">${input.value}</span>
+                    <button onclick="this.parentElement.remove()">Delete</button>
+                `;
                 list.appendChild(li);
                 input.value = "";
             }
